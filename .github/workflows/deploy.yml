@@ -1,43 +1,24 @@
-name: Deploy React App to S3
-
+name: Deploy to S3
 on:
   push:
     branches:
-      - main  # Trigger deployment on push to main branch (adjust if needed)
+      - main
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
-
     steps:
-    # Checkout the repository
-    - name: Checkout Repository
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    # Set up Docker for multi-stage build
-    - name: Set up Docker
-      run: |
-        docker build -t react-app .
-
-    # Build the React application using the Docker container
-    - name: Build React App using Docker
-      run: |
-        docker build -t react-app .
-
-    # Build the React app and store in build folder
-    - name: Build React App
-      run: |
-        docker run --rm -v $(pwd)/build:/app/build react-app
-
-    # Deploy to S3
-    - name: Deploy to S3
-      uses: jakejarvis/s3-sync-action@master
-      with:
-        source_dir: './build'  # The build directory
-        destination_bucket: ${{ secrets.S3_BUCKET_NAME }}  # The S3 bucket name
-        region: ${{ secrets.AWS_REGION }}
-        delete: true  # Delete files in S3 that aren't in the build directory (optional)
-        acl: public-read  # Optional: Make the files publicly accessible
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      - name: Deploy to S3
+        uses: jakejarvis/s3-sync-action@master
+        with:
+          source_dir: './build'  # The directory to upload (typically your build directory)
+          destination_bucket: ${{ secrets.S3_BUCKET_NAME }}  # S3 bucket name stored in secrets
+          region: ${{ secrets.AWS_REGION }}  # AWS region (e.g., us-east-1)
+          delete: true  # Delete files from S3 that aren't in the source_dir
+          acl: public-read  # Set files to be publicly accessible
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
