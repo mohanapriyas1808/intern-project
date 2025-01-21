@@ -4,7 +4,7 @@ import React from 'react'; //Import the React library, which is necessary to wri
 function App() {
   return (
     <div>
-      <h1>Hello World</h1> //The return statement contains JSX, which describes what should be rendered to the UI
+      <h1>Hello World</h1> 
     </div>
   );
 }
