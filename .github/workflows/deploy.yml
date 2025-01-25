@@ -1,24 +1,39 @@
-name: Deploy to S3
+name: Deploy React App
+
 on:
   push:
     branches:
-      - main
+      - main # Deploy when changes are pushed to the master branch
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
 
-      - name: Deploy to S3
-        uses: jakejarvis/s3-sync-action@master
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # Step 2: Set up Node.js environment
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
         with:
-          source_dir: './build'  # The directory to upload (typically your build directory)
-          destination_bucket: ${{ secrets.S3_BUCKET_NAME }}  # S3 bucket name stored in secrets
-          region: ${{ secrets.AWS_REGION }}  # AWS region (e.g., us-east-1)
-          delete: true  # Delete files from S3 that aren't in the source_dir
-          acl: public-read  # Set files to be publicly accessible
+          node-version: 18 # Use a Node.js version compatible with your React app
+
+      # Step 3: Install dependencies and build the app
+      - name: Install and Build
+        run: |
+          npm install
+          npm run build
+
+      # Step 4: Deploy to S3 using S3 Sync Action
+      - name: Deploy to S3
+        uses: jakejarvis/s3-sync-action@v0.6.0
+        with:
+          args: --acl public-read --follow-symlinks --delete
         env:
+          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          SOURCE_DIR: 'build' # Upload the build folder
