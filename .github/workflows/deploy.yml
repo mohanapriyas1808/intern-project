@@ -33,7 +33,7 @@ jobs:
           args: --acl public-read --follow-symlinks --delete
         env:
           AWS_S3_BUCKET: ${{ secrets.S3_BUCKET_NAME }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.SECRET_ACCESS_KEY }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY}}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.SECRET_ACCESS_KEYS }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
           SOURCE_DIR: 'build' # Upload the build folder
