@@ -1,39 +1,35 @@
-name: Deploy React App
+name: Build and Deploy to S3
 
 on:
   push:
     branches:
-      - main # Deploy when changes are pushed to the master branch
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the repository
-      - name: Checkout Code
-        uses: actions/checkout@v3
+    - name: Checkout Code
+      uses: actions/checkout@v3
 
-      # Step 2: Set up Node.js environment
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18 # Use a Node.js version compatible with your React app
+    - name: Set up Docker
+      uses: docker/setup-buildx-action@v2
 
-      # Step 3: Install dependencies and build the app
-      - name: Install and Build
-        run: |
-          npm install
-          npm run build
+    - name: Build Docker Image and Extract Static Files
+      run: |
+        docker build -t my-static-app .
+        docker create --name extract-container my-static-app
+        docker cp extract-container:/app/build ./build
+        docker rm extract-container
 
-      # Step 4: Deploy to S3 using S3 Sync Action
-      - name: Deploy to S3
-        uses: jakejarvis/s3-sync-action@master
-        with:
-          args: --acl public-read --follow-symlinks --delete
-        env:
-          AWS_S3_BUCKET: ${{ secrets.S3_BUCKET_NAME }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY}}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.SECRET_ACCESS_KEYS }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
-          SOURCE_DIR: 'build' # Upload the build folder
+    - name: Deploy to S3
+      uses: jakejarvis/s3-sync-action@master
+      with:
+        args: --acl public-read --follow-symlinks --delete
+      env:
+        AWS_S3_BUCKET: ${{ secrets.S3_BUCKET_NAME }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_REGION: ${{ secrets.AWS_REGION }}
+        SOURCE_DIR: 'build' # Upload the extracted build folder
