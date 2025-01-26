@@ -13,5 +13,8 @@ COPY . .
 # Build the React application
 RUN npm run build
 
-# List the contents of the directory to ensure the build folder exists
-RUN ls -alh /app  
+# Expose the port the app runs on (adjust if needed)
+EXPOSE 3000
+
+# Start the application
+CMD ["npm", "start"]  
