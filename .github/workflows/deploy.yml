@@ -23,6 +23,9 @@ jobs:
         docker cp extract-container:/app/build ./build
         docker rm extract-container
 
+    - name: Verify Build Directory
+      run: ls -alh build
+
     - name: Deploy to S3
       uses: jakejarvis/s3-sync-action@master
       with:
@@ -32,4 +35,4 @@ jobs:
         AWS_ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.SECRET_ACCESS_KEY }}
         AWS_REGION: ${{ secrets.AWS_REGION }}
-        SOURCE_DIR: 'build' # Upload the extracted build folder
+        SOURCE_DIR: 'build'
