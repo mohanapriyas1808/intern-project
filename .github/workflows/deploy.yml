@@ -1,4 +1,4 @@
-name: Build and Deploy to S3
+name: Build and Deploy to S3 and CloudFront
 
 on:
   push:
@@ -36,3 +36,11 @@ jobs:
         AWS_SECRET_ACCESS_KEY: ${{ secrets.SECRET_ACCESS_KEYS }}
         AWS_REGION: ${{ secrets.AWS_REGION }}
         SOURCE_DIR: 'build'
+
+    - name: Invalidate CloudFront Cache
+      run: |
+        aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.SECRET_ACCESS_KEYS }}
+        AWS_REGION: ${{ secrets.AWS_REGION }}
